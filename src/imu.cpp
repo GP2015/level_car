@@ -7,24 +7,24 @@ float roll, pitch, yaw;
 
 void initIMU()
 {
-  if (!mpu.begin())
-  {
-    Serial.println("Failed to find MPU6050 chip");
-    while (1)
+    if (!mpu.begin())
     {
-      delay(10);
+        Serial.println("Failed to find MPU6050 chip");
+        while (1)
+        {
+            delay(10);
+        }
     }
-  }
 
-  mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+    mpu.setGyroRange(MPU6050_RANGE_500_DEG);
 }
 
 void updateOrientation()
 {
-  sensors_event_t gyro;
-  mpu.getEvent(nullptr, &gyro, nullptr);
+    sensors_event_t gyro;
+    mpu.getEvent(nullptr, &gyro, nullptr);
 
-  roll = gyro.gyro.x;
-  pitch = gyro.gyro.y;
-  yaw = gyro.gyro.z;
+    roll = gyro.gyro.x;
+    pitch = gyro.gyro.y;
+    yaw = gyro.gyro.z;
 }
