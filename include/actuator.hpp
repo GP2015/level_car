@@ -1,2 +1,2 @@
-void initActuators();
-void setActuators();
+void init_actuators();
+void set_actuators();
