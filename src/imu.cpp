@@ -29,7 +29,7 @@ void init_imu()
     yaw = 0;
 }
 
-void update_orientation()
+void read_orientation()
 {
     sensors_event_t e;
     mpu.getEvent(nullptr, &e, nullptr);

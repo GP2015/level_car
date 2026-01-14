@@ -20,7 +20,8 @@ constexpr uint8_t BL_LEG_DIR_PIN = D5;
 constexpr uint8_t BR_LEG_PWM_PIN = D1;
 constexpr uint8_t BR_LEG_DIR_PIN = D0;
 
-constexpr uint32_t INITIALISATION_TIME = 10000;
+constexpr uint32_t INITIALISATION_DOWN_TIME = 10000;
+constexpr uint32_t INITIALISATION_MID_TIME = 10000;
 constexpr int INITIAL_DIRECTION = HIGH;
 
 void init_actuators()
@@ -42,18 +43,6 @@ void init_actuators()
 
     pinMode(BR_LEG_PWM_PIN, OUTPUT);
     pinMode(BR_LEG_DIR_PIN, OUTPUT);
-
-    digitalWrite(TL_LEG_PWM_PIN, HIGH);
-    digitalWrite(TR_LEG_PWM_PIN, HIGH);
-    digitalWrite(BL_LEG_PWM_PIN, HIGH);
-    digitalWrite(BR_LEG_PWM_PIN, HIGH);
-
-    digitalWrite(TL_LEG_DIR_PIN, INITIAL_DIRECTION);
-    digitalWrite(TR_LEG_DIR_PIN, INITIAL_DIRECTION);
-    digitalWrite(BL_LEG_DIR_PIN, INITIAL_DIRECTION);
-    digitalWrite(BR_LEG_DIR_PIN, INITIAL_DIRECTION);
-
-    delay(INITIALISATION_TIME);
 }
 
 void reset_actuator_pos()
@@ -68,5 +57,17 @@ void reset_actuator_pos()
     digitalWrite(BL_LEG_DIR_PIN, INITIAL_DIRECTION);
     digitalWrite(BR_LEG_DIR_PIN, INITIAL_DIRECTION);
 
-    delay(INITIALISATION_TIME);
+    delay(INITIALISATION_DOWN_TIME);
+
+    digitalWrite(TL_LEG_DIR_PIN, 1 - INITIAL_DIRECTION);
+    digitalWrite(TR_LEG_DIR_PIN, 1 - INITIAL_DIRECTION);
+    digitalWrite(BL_LEG_DIR_PIN, 1 - INITIAL_DIRECTION);
+    digitalWrite(BR_LEG_DIR_PIN, 1 - INITIAL_DIRECTION);
+
+    delay(INITIALISATION_MID_TIME);
+
+    digitalWrite(TL_LEG_PWM_PIN, LOW);
+    digitalWrite(TR_LEG_PWM_PIN, LOW);
+    digitalWrite(BL_LEG_PWM_PIN, LOW);
+    digitalWrite(BR_LEG_PWM_PIN, LOW);
 }
