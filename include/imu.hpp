@@ -1,3 +1,5 @@
+#pragma once
+
 extern float roll, pitch, yaw;
 
 void init_imu();
