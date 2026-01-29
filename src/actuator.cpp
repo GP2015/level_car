@@ -4,8 +4,7 @@
 
 #include "config.hpp"
 
-void reset_actuator_pos()
-{
+void reset_actuator_pos() {
     digitalWrite(TL_LEG_PWM_PIN, 1);
     digitalWrite(TR_LEG_PWM_PIN, 1);
     digitalWrite(BL_LEG_PWM_PIN, 1);
@@ -31,8 +30,7 @@ void reset_actuator_pos()
     digitalWrite(BR_LEG_PWM_PIN, 0);
 }
 
-void init_actuators()
-{
+void init_actuators() {
     pinMode(L_DRIVE_PWM_PIN, OUTPUT);
     pinMode(L_DRIVE_DIR_PIN, OUTPUT);
 
@@ -52,4 +50,30 @@ void init_actuators()
     pinMode(BR_LEG_DIR_PIN, OUTPUT);
 
     reset_actuator_pos();
+}
+
+void update_actuators(float pitch, float roll) {
+    if (pitch < 0) {
+        digitalWrite(TL_LEG_DIR_PIN, 1);
+        digitalWrite(BR_LEG_DIR_PIN, 0);
+        digitalWrite(TL_LEG_PWM_PIN, 1);
+        digitalWrite(BR_LEG_PWM_PIN, 1);
+    } else if (pitch > 0) {
+        digitalWrite(TR_LEG_DIR_PIN, 1);
+        digitalWrite(BL_LEG_DIR_PIN, 0);
+        digitalWrite(TR_LEG_PWM_PIN, 1);
+        digitalWrite(BL_LEG_PWM_PIN, 1);
+    }
+
+    if (roll > 0) {
+        digitalWrite(BL_LEG_DIR_PIN, 1);
+        digitalWrite(TR_LEG_DIR_PIN, 0);
+        digitalWrite(BL_LEG_PWM_PIN, 1);
+        digitalWrite(TR_LEG_PWM_PIN, 1);
+    } else if (pitch > 0) {
+        digitalWrite(BR_LEG_DIR_PIN, 1);
+        digitalWrite(TL_LEG_DIR_PIN, 0);
+        digitalWrite(BR_LEG_PWM_PIN, 1);
+        digitalWrite(TL_LEG_PWM_PIN, 1);
+    }
 }
