@@ -43,6 +43,10 @@ void loop() {
 #endif
 
 #if USE_ACTUATORS
+#if USE_IMU
     update_actuators(roll, pitch);
+#else
+    update_actuators_no_imu();
+#endif
 #endif
 }

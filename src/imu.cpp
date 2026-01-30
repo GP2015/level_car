@@ -1,7 +1,11 @@
-#include <Arduino.h>
-#include <Wire.h>
+#include "imu.hpp"
 
 #include "config.hpp"
+
+#if MANUAL_I2C
+
+#include <Arduino.h>
+#include <Wire.h>
 
 #define MPU_ADDR 0x68
 
@@ -59,3 +63,58 @@ void read_orientation() {
     delay(500);
 #endif
 }
+
+#else
+
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
+#include <Wire.h>
+
+#include "config.hpp"
+
+Adafruit_MPU6050 mpu;
+float roll, pitch, yaw;
+long prev_time;
+
+void init_imu() {
+    if (!mpu.begin()) {
+        while (true) {
+#if USE_SERIAL_MONITOR
+            Serial.println("Failed to find MPU6050 chip");
+#endif
+
+            delay(10);
+        };
+
+        return;
+    }
+
+    mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
+    mpu.setGyroRange(MPU6050_RANGE_250_DEG);
+
+    roll = 0;
+    pitch = 0;
+    yaw = 0;
+
+    prev_time = millis();
+}
+
+void read_orientation() {
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp);
+
+    long current_time = millis();
+    long time_dif = current_time - prev_time;
+
+    roll += g.gyro.x * time_dif;
+    pitch += g.gyro.y * time_dif;
+    yaw += g.gyro.z * time_dif;
+
+    prev_time = current_time;
+
+#if USE_SERIAL_MONITOR && PRINT_ROTATION
+    Serial.printf("Rotation (RPY): %f, %f, %f\n", roll, pitch, yaw);
+#endif
+}
+
+#endif
