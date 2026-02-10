@@ -78,7 +78,7 @@ float roll, pitch;
 
 unsigned long prev_time;
 
-const float FILTER_ALPHA = 0.98f;
+const float FILTER_RATIO = 0.98f;
 
 void init_imu() {
     if (!mpu.begin()) {
@@ -111,19 +111,16 @@ void update_orientation() {
 
     float dt = get_delta_time();
 
-    float gyro_roll_rate = gyro.gyro.x * RAD_TO_DEG;
-    float gyro_pitch_rate = gyro.gyro.y * RAD_TO_DEG;
+    float gyro_only_roll = roll + gyro.gyro.x * RAD_TO_DEG * dt;
+    float gyro_only_pitch = pitch + gyro.gyro.y * RAD_TO_DEG * dt;
 
-    float roll_gyro = roll + gyro_roll_rate * dt;
-    float pitch_gyro = pitch + gyro_pitch_rate * dt;
-
-    float accel_roll = atan2(accel.acceleration.y, accel.acceleration.z) * RAD_TO_DEG;
+    float accel_only_roll = atan2(accel.acceleration.y, accel.acceleration.z) * RAD_TO_DEG;
 
     float diagonal = sqrt(pow(accel.acceleration.y, 2) + pow(accel.acceleration.z, 2));
-    float accel_pitch = atan2(-accel.acceleration.x, diagonal) * RAD_TO_DEG;
+    float accel_only_pitch = atan2(-accel.acceleration.x, diagonal) * RAD_TO_DEG;
 
-    roll = FILTER_ALPHA * roll_gyro + (1.0f - FILTER_ALPHA) * accel_roll;
-    pitch = FILTER_ALPHA * pitch_gyro + (1.0f - FILTER_ALPHA) * accel_pitch;
+    roll = FILTER_RATIO * gyro_only_roll + (1.0 - FILTER_RATIO) * accel_only_roll;
+    pitch = FILTER_RATIO * gyro_only_pitch + (1.0 - FILTER_RATIO) * accel_only_pitch;
 
 #if USE_SERIAL_MONITOR && PRINT_ROTATION
     Serial.printf("RP: %.2f, %.2f\n", roll, pitch);
