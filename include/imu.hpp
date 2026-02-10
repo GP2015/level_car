@@ -1,6 +1,6 @@
 #pragma once
 
-extern float roll, pitch, yaw;
+extern float roll, pitch;
 
 void init_imu();
-void read_orientation();
+void update_orientation();

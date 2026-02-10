@@ -2,12 +2,12 @@
 
 #define HELLO_WORLD 0
 
-#define USE_MOTORS 1
+#define USE_MOTORS 0
 #define USE_ACTUATORS 1
-#define USE_IMU 0
+#define USE_IMU 1
 
-#define USE_SERIAL_MONITOR 0
-#define PRINT_ROTATION 0
+#define USE_SERIAL_MONITOR 1
+#define PRINT_ROTATION 1
 
 #define MANUAL_I2C 0
 

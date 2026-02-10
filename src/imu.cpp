@@ -1,6 +1,7 @@
 #include "imu.hpp"
 
 #include "config.hpp"
+#include "smoother.hpp"
 
 #if MANUAL_I2C
 
@@ -42,7 +43,7 @@ void init_imu() {
     delay(10);
 }
 
-void read_orientation() {
+void update_orientation() {
     uint8_t raw[14];
     read_from_imu(0x3B, raw, 14);
 
@@ -73,8 +74,11 @@ void read_orientation() {
 #include "config.hpp"
 
 Adafruit_MPU6050 mpu;
-float roll, pitch, yaw;
-long prev_time;
+float roll, pitch;
+
+unsigned long prev_time;
+
+const float FILTER_ALPHA = 0.98f;
 
 void init_imu() {
     if (!mpu.begin()) {
@@ -82,38 +86,47 @@ void init_imu() {
 #if USE_SERIAL_MONITOR
             Serial.println("Failed to find MPU6050 chip");
 #endif
-
             delay(10);
         };
-
-        return;
     }
 
     mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
     mpu.setGyroRange(MPU6050_RANGE_250_DEG);
 
-    roll = 0;
-    pitch = 0;
-    yaw = 0;
+    roll = pitch = 0;
 
     prev_time = millis();
 }
 
-void read_orientation() {
-    sensors_event_t a, g, temp;
-    mpu.getEvent(&a, &g, &temp);
-
-    long current_time = millis();
-    long time_dif = current_time - prev_time;
-
-    roll += g.gyro.x * time_dif;
-    pitch += g.gyro.y * time_dif;
-    yaw += g.gyro.z * time_dif;
-
+long get_delta_time() {
+    unsigned long current_time = millis();
+    float dt = (current_time - prev_time) / 1000.0;
     prev_time = current_time;
+    return dt;
+}
+
+void update_orientation() {
+    sensors_event_t accel, gyro, temp;
+    mpu.getEvent(&accel, &gyro, &temp);
+
+    float dt = get_delta_time();
+
+    float gyro_roll_rate = gyro.gyro.x * RAD_TO_DEG;
+    float gyro_pitch_rate = gyro.gyro.y * RAD_TO_DEG;
+
+    float roll_gyro = roll + gyro_roll_rate * dt;
+    float pitch_gyro = pitch + gyro_pitch_rate * dt;
+
+    float accel_roll = atan2(accel.acceleration.y, accel.acceleration.z) * RAD_TO_DEG;
+
+    float diagonal = sqrt(pow(accel.acceleration.y, 2) + pow(accel.acceleration.z, 2));
+    float accel_pitch = atan2(-accel.acceleration.x, diagonal) * RAD_TO_DEG;
+
+    roll = FILTER_ALPHA * roll_gyro + (1.0f - FILTER_ALPHA) * accel_roll;
+    pitch = FILTER_ALPHA * pitch_gyro + (1.0f - FILTER_ALPHA) * accel_pitch;
 
 #if USE_SERIAL_MONITOR && PRINT_ROTATION
-    Serial.printf("Rotation (RPY): %f, %f, %f\n", roll, pitch, yaw);
+    Serial.printf("RP: %.2f, %.2f\n", roll, pitch);
 #endif
 }
 

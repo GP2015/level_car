@@ -39,7 +39,7 @@ void loop() {
 #endif
 
 #if USE_IMU
-    read_orientation();
+    update_orientation();
 #endif
 
 #if USE_ACTUATORS
